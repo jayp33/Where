@@ -14,13 +14,13 @@ public class ItemTable {
     @DatabaseField(canBeNull = false)
     private String description;
 
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     private CatalogTable catalog;
 
-    @DatabaseField
+    @DatabaseField(foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     private LocationTable location;
 
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(canBeNull = false, foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true)
     private RoomTable room;
 
     ItemTable() {
