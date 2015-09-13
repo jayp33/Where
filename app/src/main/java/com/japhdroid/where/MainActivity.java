@@ -57,15 +57,14 @@ public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     }
 
     private void PopulateListView() {
-        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
         ArrayAdapter<ArrayList> itemsAdapter;
-        List<String> noCatalog = new ArrayList<String>();
-        noCatalog.add(getString(R.string.message_no_catalog));
-        if (catalogDao.countOf() > 0) {
-            List<CatalogTable> catalogs = catalogDao.queryForAll();
-            itemsAdapter = new ArrayAdapter<ArrayList>(this, android.R.layout.simple_list_item_1, (ArrayList) catalogs);
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
+        if (DataProvider.ExistCatalogs(catalogDao)) {
+            itemsAdapter = new ArrayAdapter<ArrayList>(this, android.R.layout.simple_list_item_1, (ArrayList) DataProvider.getCatalogs(catalogDao));
         }
         else {
+            List<String> noCatalog = new ArrayList<String>();
+            noCatalog.add(getString(R.string.message_no_catalog));
             itemsAdapter = new ArrayAdapter<ArrayList>(this, android.R.layout.simple_list_item_1, (ArrayList) noCatalog);
         }
         ListView listView = (ListView) findViewById(R.id.list);
