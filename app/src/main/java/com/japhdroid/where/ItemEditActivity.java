@@ -52,7 +52,7 @@ public class ItemEditActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         catalog = DataProvider.getCatalog(catalogDao, catalogName);
         itemId = getIntent().getIntExtra("ITEM_ID", -1);
         if (itemId < 0) {
-            Toast.makeText(ItemEditActivity.this, "Error: Item not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ItemEditActivity.this, "Gegenstand nicht gefunden. Erstelle neuen.", Toast.LENGTH_SHORT).show();
             return;
         }
         RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
