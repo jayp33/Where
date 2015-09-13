@@ -8,13 +8,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
 
@@ -40,14 +43,31 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
         RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
         List<ItemTable> items = DataProvider.getItems(itemDao, DataProvider.getCatalog(catalogDao, catalog));
-        if (items != null)
-            itemsAdapter = new ArrayAdapter<ArrayList>(this, android.R.layout.simple_list_item_1, (ArrayList) items);
+        ListView listView = (ListView) findViewById(R.id.list);
+        if (items != null) {
+            List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+            for (ItemTable item : items) {
+                Map<String, String> datum = new HashMap<String, String>(2);
+                datum.put("item", item.getDescription());
+                String location = "";
+                if (!item.getLocation().getDescription().equals(""))
+                    location = item.getLocation().getDescription() + "\n";
+                location += item.getRoom().getDescription();
+                datum.put("location", location);
+                data.add(datum);
+            }
+            SimpleAdapter adapter = new SimpleAdapter(this, data,
+                    android.R.layout.simple_list_item_2,
+                    new String[] {"item", "location"},
+                    new int[] {android.R.id.text1,
+                            android.R.id.text2});
+            listView.setAdapter(adapter);
+        }
         else {
             noItems.add(getString(R.string.message_no_item));
             itemsAdapter = new ArrayAdapter<ArrayList>(this, android.R.layout.simple_list_item_1, (ArrayList) noItems);
+            listView.setAdapter(itemsAdapter);
         }
-        ListView listView = (ListView) findViewById(R.id.list);
-        listView.setAdapter(itemsAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
