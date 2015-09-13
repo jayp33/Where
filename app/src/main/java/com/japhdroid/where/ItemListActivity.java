@@ -1,5 +1,6 @@
 package com.japhdroid.where;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,21 +18,29 @@ import java.util.List;
 
 public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
 
+    private String catalog = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
+        PopulateListView();
+    }
 
-        String catalog = getIntent().getStringExtra("CATALOG");
-        RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PopulateListView();
+    }
+
+    private void PopulateListView() {
+        catalog = getIntent().getStringExtra("CATALOG");
         ArrayAdapter<ArrayList> itemsAdapter;
         List<String> noItems = new ArrayList<>();
-        List<ItemTable> items = itemDao.queryForAll();
-        for (ItemTable item : items) {
-            if (!item.getCatalog().getDescription().equals(catalog))
-                items.remove(item);
-        }
-        if (items.size() > 0)
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
+        RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
+        List<ItemTable> items = DataProvider.getItems(itemDao, DataProvider.getCatalog(catalogDao, catalog));
+        if (items != null)
             itemsAdapter = new ArrayAdapter<ArrayList>(this, android.R.layout.simple_list_item_1, (ArrayList) items);
         else {
             noItems.add(getString(R.string.message_no_item));
@@ -45,9 +54,9 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String item = parent.getItemAtPosition(position).toString();
                 if (item.equals(getString(R.string.message_no_item)))
-                    EditItem(true);
+                    CreateItem();
                 else
-                    EditItem(false);
+                    EditItem(item);
             }
         });
     }
@@ -71,13 +80,30 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
             return true;
         }
         if (id == R.id.action_create_item) {
-            EditItem(true);
+            CreateItem();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void EditItem(boolean create) {
-        Toast.makeText(ItemListActivity.this, "Click", Toast.LENGTH_SHORT).show();
+    private void CreateItem() {
+        EditItem(null);
+    }
+
+    private void EditItem(String itemName) {
+        int itemId = -1;
+        if (itemName != null) { // edit
+            RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
+            ItemTable item = DataProvider.getItem(itemDao, itemName);
+            if (item == null) {
+                Toast.makeText(ItemListActivity.this, "Error: Items ambiguous", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            itemId = item.getId();
+        }
+        Intent i = new Intent(this, ItemEditActivity.class);
+        i.putExtra("CATALOG", catalog);
+        i.putExtra("ITEM_ID", itemId);
+        startActivity(i);
     }
 }

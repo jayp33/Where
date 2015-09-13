@@ -67,4 +67,19 @@
             android:hint="@string/message_create_itemRoom_hint" />
     </LinearLayout>
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/SaveItemLayout"
+        android:layout_below="@id/RoomLayout">
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/buttonText_save_item"
+            android:id="@+id/buttonSaveItem"
+            android:onClick="SaveItem" />
+    </LinearLayout>
+
 </RelativeLayout>
