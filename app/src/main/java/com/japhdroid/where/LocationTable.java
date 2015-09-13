@@ -11,7 +11,7 @@ public class LocationTable {
     @DatabaseField(generatedId = true)
     private int id;
 
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(unique = true)
     private String description;
 
     LocationTable() {
