@@ -21,6 +21,11 @@ public class CatalogTable {
         this.description = description;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return ((CatalogTable) o).description.equals(this.description);
+    }
+
     public String getDescription() {
         return description;
     }
