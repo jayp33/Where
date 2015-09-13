@@ -49,6 +49,9 @@ public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         if (id == R.id.action_create_catalog) {
             CreateCatalogDialog();
         }
+        if (id == R.id.action_clear_all_tables) {
+            ClearAllTables();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -108,5 +111,41 @@ public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         Toast.makeText(MainActivity.this,
                 String.format(getString(R.string.message_create_catalog_complete),catalogName),
                 Toast.LENGTH_SHORT).show();
+    }
+
+    private void ClearAllTables() {
+        RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
+        if (itemDao.countOf() > 0) {
+            List<ItemTable> items = itemDao.queryForAll();
+            for (ItemTable item : items) {
+                itemDao.delete(item);
+            }
+        }
+
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
+        if (catalogDao.countOf() > 0) {
+            List<CatalogTable> catalogs = catalogDao.queryForAll();
+            for (CatalogTable catalog : catalogs) {
+                catalogDao.delete(catalog);
+            }
+        }
+
+        RuntimeExceptionDao<LocationTable, Integer> locationDao = getHelper().getLocationTableDao();
+        if (locationDao.countOf() > 0) {
+            List<LocationTable> locations = locationDao.queryForAll();
+            for (LocationTable location : locations) {
+                locationDao.delete(location);
+            }
+        }
+
+        RuntimeExceptionDao<RoomTable, Integer> roomDao = getHelper().getRoomTableDao();
+        if (roomDao.countOf() > 0) {
+            List<RoomTable> rooms = roomDao.queryForAll();
+            for (RoomTable room : rooms) {
+                roomDao.delete(room);
+            }
+        }
+
+        PopulateListView();
     }
 }
