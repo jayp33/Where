@@ -6,4 +6,65 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.japhdroid.where.ItemEditActivity">
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ItemLayout">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_item_description"
+            android:id="@+id/textViewItem" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editTextItem"
+            android:hint="@string/message_create_item_hint" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/LocationLayout"
+        android:layout_below="@id/ItemLayout">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_item_location"
+            android:id="@+id/textViewLocation" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editTextLocation"
+            android:hint="@string/message_create_itemLocation_hint" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/RoomLayout"
+        android:layout_below="@id/LocationLayout">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_item_room"
+            android:id="@+id/textViewRoom" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editTextRoom"
+            android:hint="@string/message_create_itemRoom_hint" />
+    </LinearLayout>
+
 </RelativeLayout>

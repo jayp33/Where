@@ -13,4 +13,10 @@
     <string name="title_activity_item_list">Gegenstände</string>
     <string name="message_no_item">Tippen um Eintrag zu erstellen</string>
     <string name="title_activity_item_edit">Gegenstand bearbeiten</string>
+    <string name="textView_item_description">Gegenstand</string>
+    <string name="message_create_item_hint">Geben Sie den Gegenstand ein</string>
+    <string name="textView_item_location">Lagerort</string>
+    <string name="message_create_itemLocation_hint">Geben Sie den Lagerort ein</string>
+    <string name="textView_item_room">Lagerraum</string>
+    <string name="message_create_itemRoom_hint">Geben Sie den Lagerraum ein</string>
 </resources>
