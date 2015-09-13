@@ -1,11 +1,16 @@
 package com.japhdroid.where;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -40,6 +45,9 @@ public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         if (id == R.id.action_settings) {
             return true;
         }
+        if (id == R.id.action_create_catalog) {
+            CreateCatalogDialog();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -58,5 +66,41 @@ public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         }
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(itemsAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String item = parent.getItemAtPosition(position).toString();
+                if (item.equals(getString(R.string.message_no_catalog)))
+                    CreateCatalogDialog();
+            }
+        });
+    }
+
+    private void CreateCatalogDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.message_create_catalog_title));
+        final EditText input = new EditText(this);
+        input.setHint(getString(R.string.message_create_catalog_hint));
+        builder.setView(input);
+        builder.setPositiveButton(getString(R.string.buttonText_create_catalog), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                String catalogName = input.getText().toString();
+                if (catalogName.length() > 0)
+                    CreateCatalog(catalogName);
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void CreateCatalog(String catalogName) {
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
+        CatalogTable catalog = new CatalogTable(catalogName);
+        catalogDao.create(catalog);
+        PopulateListView();
+        Toast.makeText(MainActivity.this,
+                String.format(getString(R.string.message_create_catalog_complete),catalogName),
+                Toast.LENGTH_SHORT).show();
     }
 }
