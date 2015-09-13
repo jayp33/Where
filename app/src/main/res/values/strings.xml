@@ -12,4 +12,5 @@
     <string name="message_create_catalog_complete">Katalog %s wurde angelegt</string>
     <string name="title_activity_item_list">Gegenstände</string>
     <string name="message_no_item">Tippen um Eintrag zu erstellen</string>
+    <string name="title_activity_item_edit">Gegenstand bearbeiten</string>
 </resources>
