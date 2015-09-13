@@ -27,7 +27,6 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
-        PopulateListView();
     }
 
     @Override
