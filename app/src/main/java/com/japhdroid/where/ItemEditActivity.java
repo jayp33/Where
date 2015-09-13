@@ -96,6 +96,6 @@ public class ItemEditActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         else
             DataProvider.updateItem(itemDao, item);
         Toast.makeText(ItemEditActivity.this, "Saved", Toast.LENGTH_SHORT).show();
-        //finish();
+        finish();
     }
 }
