@@ -2,6 +2,7 @@ package com.japhdroid.where;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,6 +74,11 @@ public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
                 String item = parent.getItemAtPosition(position).toString();
                 if (item.equals(getString(R.string.message_no_catalog)))
                     CreateCatalogDialog();
+                else {
+                    Intent i = new Intent(MainActivity.this, ItemListActivity.class);
+                    i.putExtra("CATALOG", item);
+                    startActivity(i);
+                }
             }
         });
     }

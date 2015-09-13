@@ -64,9 +64,6 @@ public class ItemTable {
 
     @Override
     public String toString() {
-        return "ItemTable{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                '}';
+        return description;
     }
 }
