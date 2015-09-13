@@ -31,9 +31,6 @@ public class CatalogTable {
 
     @Override
     public String toString() {
-        return "CatalogTable{" +
-                "id=" + id +
-                ", description='" + description + '\'' +
-                '}';
+        return description;
     }
 }
