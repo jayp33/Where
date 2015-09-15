@@ -15,9 +15,9 @@ public class DataProvider {
 
     public static CatalogTable getCatalog(RuntimeExceptionDao<CatalogTable, Integer> dao, String catalogName) {
         List<CatalogTable> catalogs = dao.queryForEq("description", catalogName);
-        if (catalogs.size() > 1)
-            return null;
-        return catalogs.get(0);
+        if (catalogs.size() == 1)
+            return catalogs.get(0);
+        return null;
     }
 
     public static List<CatalogTable> getCatalogs(RuntimeExceptionDao<CatalogTable, Integer> dao) {
