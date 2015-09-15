@@ -2,6 +2,7 @@ package com.japhdroid.where;
 
 import android.app.AlertDialog;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -17,7 +18,11 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlertDialog;
 import org.robolectric.util.ActivityController;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.robolectric.Shadows.shadowOf;
 
 /**
@@ -48,17 +53,31 @@ public class MainActivityTest {
     @Test
     public void testEmptyItemListViewContainsPlaceholder() throws Exception {
         MainActivity activity = mController.create().start().resume().visible().get();
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = activity.getHelper().getCatalogTableDao();
+        assertFalse(DataProvider.ExistCatalogs(catalogDao));
+        // Click on placeholder in MainActivity
         ListView catalogList = (ListView) activity.findViewById(R.id.list);
         ListAdapter adapter = catalogList.getAdapter();
         View itemView = adapter.getView(0, null, catalogList);
         catalogList.performItemClick(itemView, 0, adapter.getItemId(0));
+        // Populate and confirm dialog box
         AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
         ShadowAlertDialog sAlert = shadowOf(alert);
-        assertEquals(activity.getString(R.string.message_create_catalog_title), sAlert.getTitle().toString());
-        // TODO enter text in EditText (getView()) and click OK
+        assertTrue(alert.isShowing());
+        EditText catalogName = (EditText) sAlert.getView();
+        assertEquals(activity.getString(R.string.message_create_catalog_hint), catalogName.getHint());
+        catalogName.setText("#TEST");
+        sAlert.clickOn(alert.getButton(AlertDialog.BUTTON_POSITIVE).getId());
+        assertFalse(alert.isShowing());
         // Assert catalog creation
-        // Open created catalog
-        // Assert Placeholder
+        List<CatalogTable> catalogs = DataProvider.getCatalogs(catalogDao);
+        assertEquals(1, catalogs.size());
+        assertEquals("#TEST", catalogs.get(0).getDescription());
+        assertEquals(1, catalogList.getCount());
+        assertEquals("#TEST", catalogList.getItemAtPosition(0).toString());
+
+        // TODO Open created catalog
+        // Assert placeholder in ItemListActivity
     }
 
     @After
