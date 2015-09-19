@@ -96,10 +96,10 @@ public class MainActivityTest {
         Intent intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
         intent.putExtra("CATALOG", "#TEST");
         mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
-        ItemListActivity activity2 = mControllerItemList.create().start().resume().visible().get();
-        ListView itemList = (ListView) activity2.findViewById(R.id.list);
+        ItemListActivity activity = mControllerItemList.create().start().resume().visible().get();
+        ListView itemList = (ListView) activity.findViewById(R.id.list);
         assertEquals(1, itemList.getCount());
-        assertEquals(activity2.getString(R.string.message_no_item), itemList.getItemAtPosition(0).toString());
+        assertEquals(activity.getString(R.string.message_no_item), itemList.getItemAtPosition(0).toString());
         mControllerItemList = mControllerItemList.pause().stop().destroy();
     }
 
