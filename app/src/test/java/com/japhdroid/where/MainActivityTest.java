@@ -1,6 +1,7 @@
 package com.japhdroid.where;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -16,6 +17,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlertDialog;
+import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.util.ActivityController;
 
 import java.util.List;
@@ -32,34 +34,39 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(constants = BuildConfig.class)
 public class MainActivityTest {
 
-    ActivityController<MainActivity> mController;
+    DatabaseHelper dbhelper;
+    ActivityController<MainActivity> mControllerMain;
+    ActivityController<ItemListActivity> mControllerItemList;
 
     @Before
     public void setUp() throws Exception {
-        mController = Robolectric.buildActivity(MainActivity.class);
+        dbhelper = new DatabaseHelper(ShadowApplication.getInstance().getApplicationContext());
     }
 
     @Test
     public void testEmptyCatalogListViewContainsPlaceholder() throws Exception {
-        MainActivity activity = mController.create().start().resume().visible().get();
+        mControllerMain = Robolectric.buildActivity(MainActivity.class);
+        MainActivity activity = mControllerMain.create().start().resume().visible().get();
         ListView list = (ListView) activity.findViewById(R.id.list);
-        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = activity.getHelper().getCatalogTableDao();
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
         if (!DataProvider.ExistCatalogs(catalogDao)) {
-            assertEquals(list.getCount(), 1);
-            assertEquals(list.getItemAtPosition(0).toString(), activity.getString(R.string.message_no_catalog));
+            assertEquals(1, list.getCount());
+            assertEquals(activity.getString(R.string.message_no_catalog), list.getItemAtPosition(0).toString());
         }
+        mControllerMain = mControllerMain.pause().stop().destroy();
     }
 
     @Test
-    public void testEmptyItemListViewContainsPlaceholder() throws Exception {
-        MainActivity activity = mController.create().start().resume().visible().get();
-        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = activity.getHelper().getCatalogTableDao();
+    public void testCatalogCreation() throws Exception {
+        mControllerMain = Robolectric.buildActivity(MainActivity.class);
+        MainActivity activity = mControllerMain.create().start().resume().visible().get();
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
         assertFalse(DataProvider.ExistCatalogs(catalogDao));
         // Click on placeholder in MainActivity
         ListView catalogList = (ListView) activity.findViewById(R.id.list);
         ListAdapter adapter = catalogList.getAdapter();
-        View itemView = adapter.getView(0, null, catalogList);
-        catalogList.performItemClick(itemView, 0, adapter.getItemId(0));
+        View catalogItemView = adapter.getView(0, null, catalogList);
+        catalogList.performItemClick(catalogItemView, 0, adapter.getItemId(0));
         // Populate and confirm dialog box
         AlertDialog alert = ShadowAlertDialog.getLatestAlertDialog();
         ShadowAlertDialog sAlert = shadowOf(alert);
@@ -75,13 +82,29 @@ public class MainActivityTest {
         assertEquals("#TEST", catalogs.get(0).getDescription());
         assertEquals(1, catalogList.getCount());
         assertEquals("#TEST", catalogList.getItemAtPosition(0).toString());
+        catalogList.performItemClick(catalogItemView, 0, adapter.getItemId(0));
+        Intent expectedIntent = new Intent(activity, ItemListActivity.class);
+        expectedIntent.putExtra("CATALOG", "#TEST");
+        assertEquals(expectedIntent, shadowOf(activity).getNextStartedActivity());
+        mControllerMain = mControllerMain.pause().stop().destroy();
+    }
 
-        // TODO Open created catalog
-        // Assert placeholder in ItemListActivity
+    @Test
+    public void testEmptyItemListViewContainsPlaceholder() throws Exception {
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
+        catalogDao.create(new CatalogTable("#TEST"));
+        Intent intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
+        ItemListActivity activity2 = mControllerItemList.create().start().resume().visible().get();
+        ListView itemList = (ListView) activity2.findViewById(R.id.list);
+        assertEquals(1, itemList.getCount());
+        assertEquals(activity2.getString(R.string.message_no_item), itemList.getItemAtPosition(0).toString());
+        mControllerItemList = mControllerItemList.pause().stop().destroy();
     }
 
     @After
     public void tearDown() throws Exception {
-        mController = mController.pause().stop().destroy();
+        dbhelper.close();
     }
 }
