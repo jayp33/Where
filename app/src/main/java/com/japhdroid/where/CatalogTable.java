@@ -23,6 +23,8 @@ public class CatalogTable {
 
     @Override
     public boolean equals(Object o) {
+        if (!o.getClass().equals(this.getClass()))
+            return false;
         return ((CatalogTable) o).description.equals(this.description);
     }
 
