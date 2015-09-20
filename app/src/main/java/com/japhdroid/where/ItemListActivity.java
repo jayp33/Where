@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
 
-    private String catalog = null;
+    private CatalogTable catalog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,12 +36,12 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     }
 
     private void PopulateListView() {
-        catalog = getIntent().getStringExtra("CATALOG");
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
+        catalog = catalogDao.queryForEq("description", getIntent().getStringExtra("CATALOG")).get(0);
         ArrayAdapter<ArrayList> itemsAdapter;
         List<String> noItems = new ArrayList<>();
-        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = getHelper().getCatalogTableDao();
         RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
-        List<ItemTable> items = DataProvider.getItems(itemDao, DataProvider.getCatalog(catalogDao, catalog));
+        List<ItemTable> items = DataProvider.getItems(itemDao, catalog);
         ListView listView = (ListView) findViewById(R.id.list);
         if (items.size() > 0) {
             List<Map<String, String>> data = new ArrayList<Map<String, String>>();
@@ -71,7 +71,7 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String item = parent.getItemAtPosition(position).toString();
+                String item = ((HashMap) parent.getItemAtPosition(position)).get("item").toString();
                 if (item.equals(getString(R.string.message_no_item)))
                     CreateItem();
                 else
@@ -113,7 +113,7 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         int itemId = -1;
         if (itemName != null) { // edit
             RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
-            ItemTable item = DataProvider.getItem(itemDao, itemName);
+            ItemTable item = DataProvider.getItem(itemDao, itemName, catalog);
             if (item == null) {
                 Toast.makeText(ItemListActivity.this, "Error: Items ambiguous", Toast.LENGTH_SHORT).show();
                 return;
@@ -121,7 +121,7 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
             itemId = item.getId();
         }
         Intent i = new Intent(this, ItemEditActivity.class);
-        i.putExtra("CATALOG", catalog);
+        i.putExtra("CATALOG", catalog.getDescription());
         i.putExtra("ITEM_ID", itemId);
         startActivity(i);
     }

@@ -2,7 +2,9 @@ package com.japhdroid.where;
 
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by User on 13.09.2015.
@@ -44,15 +46,13 @@ public class DataProvider {
     }
 
     public static ItemTable getItem(RuntimeExceptionDao<ItemTable, Integer> dao, String itemName, CatalogTable catalog) {
-        if (catalog == null)
-            return null;
-        List<ItemTable> items = dao.queryForEq("description", itemName);
-        for (ItemTable item : items)
-            if (!item.getCatalog().equals(catalog))
-                items.remove(item);
-        if (items.size() > 1)
-            return null;
-        return items.get(0);
+        Map<String, Object> fieldValues = new HashMap<String, Object>(2);
+        fieldValues.put("description", itemName);
+        fieldValues.put("catalog_id", catalog);
+        List<ItemTable> result = dao.queryForFieldValues(fieldValues);
+        if (result.size() == 1)
+            return result.get(0);
+        return null;
     }
 
     public static List<ItemTable> getItems(RuntimeExceptionDao<ItemTable, Integer> dao, CatalogTable catalog) {
