@@ -19,6 +19,7 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlertDialog;
 import org.robolectric.shadows.ShadowApplication;
+import org.robolectric.shadows.ShadowToast;
 import org.robolectric.util.ActivityController;
 
 import java.util.HashMap;
@@ -189,6 +190,46 @@ public class MainActivityTest {
         datum.put("item", "#TEST1");
         datum.put("location", "#LOCATION\n#ROOM");
         assertEquals(datum, itemList.getItemAtPosition(0));
+        mControllerItemList = mControllerItemList.pause().stop().destroy();
+    }
+
+    @Test
+    public void testItemCreationWithoutRoom() throws Exception {
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
+        catalogDao.create(new CatalogTable("#TEST"));
+
+        Intent intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
+        ItemListActivity activity = mControllerItemList.create().start().resume().visible().get();
+        ListView itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(1, itemList.getCount());
+        assertEquals(activity.getString(R.string.message_no_item), itemList.getItemAtPosition(0).toString());
+        mControllerItemList = mControllerItemList.pause().stop();
+
+        intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemEditActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        intent.putExtra("ITEM_ID", -1);
+        mControllerItemEdit = Robolectric.buildActivity(ItemEditActivity.class).withIntent(intent);
+        ItemEditActivity activityEdit = mControllerItemEdit.create().start().resume().visible().get();
+        EditText etItem = (EditText) activityEdit.findViewById(R.id.editTextItem);
+        assertEquals("", etItem.getText().toString());
+        EditText etLocation = (EditText) activityEdit.findViewById(R.id.editTextLocation);
+        assertEquals("", etLocation.getText().toString());
+        EditText etRoom = (EditText) activityEdit.findViewById(R.id.editTextRoom);
+        assertEquals("", etRoom.getText().toString());
+        etItem.setText("#TEST1");
+        etLocation.setText("#LOCATION");
+        Button saveButton = (Button) activityEdit.findViewById(R.id.buttonSaveItem);
+        saveButton.performClick();
+        assertEquals("Beschreibung und Lagerraum müssen angegeben werden", ShadowToast.getTextOfLatestToast());
+        activityEdit.finish();
+        mControllerItemEdit = mControllerItemEdit.pause().stop().destroy();
+
+        mControllerItemList = mControllerItemList.restart().resume();
+        itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(1, itemList.getCount());
+        assertEquals(activity.getString(R.string.message_no_item), itemList.getItemAtPosition(0));
         mControllerItemList = mControllerItemList.pause().stop().destroy();
     }
 
