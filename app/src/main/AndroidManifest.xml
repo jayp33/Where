@@ -26,11 +26,7 @@
         </activity>
         <activity
             android:name=".ItemEditActivity"
-            android:label="@string/title_activity_item_edit"
-            android:parentActivityName=".ItemListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.japhdroid.where.ItemListActivity" />
+            android:label="@string/title_activity_item_edit" >
         </activity>
     </application>
 
