@@ -43,7 +43,7 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         RuntimeExceptionDao<ItemTable, Integer> itemDao = getHelper().getItemTableDao();
         List<ItemTable> items = DataProvider.getItems(itemDao, DataProvider.getCatalog(catalogDao, catalog));
         ListView listView = (ListView) findViewById(R.id.list);
-        if (items != null) {
+        if (items.size() > 0) {
             List<Map<String, String>> data = new ArrayList<Map<String, String>>();
             for (ItemTable item : items) {
                 Map<String, String> datum = new HashMap<String, String>(2);

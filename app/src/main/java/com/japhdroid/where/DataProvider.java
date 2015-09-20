@@ -56,15 +56,7 @@ public class DataProvider {
     }
 
     public static List<ItemTable> getItems(RuntimeExceptionDao<ItemTable, Integer> dao, CatalogTable catalog) {
-        if (catalog == null)
-            return null;
-        List<ItemTable> items = dao.queryForAll();
-        for (ItemTable item : items)
-            if (!item.getCatalog().equals(catalog))
-                items.remove(item);
-        if (items.size() > 0)
-            return items;
-        return null;
+        return dao.queryForEq("catalog_id", catalog);
     }
 
     public static List<ItemTable> getItems(RuntimeExceptionDao<ItemTable, Integer> dao, String itemName) {
