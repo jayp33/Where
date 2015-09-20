@@ -20,7 +20,9 @@ import org.robolectric.shadows.ShadowAlertDialog;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.util.ActivityController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -98,6 +100,49 @@ public class MainActivityTest {
         mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
         ItemListActivity activity = mControllerItemList.create().start().resume().visible().get();
         ListView itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(1, itemList.getCount());
+        assertEquals(activity.getString(R.string.message_no_item), itemList.getItemAtPosition(0).toString());
+        mControllerItemList = mControllerItemList.pause().stop().destroy();
+    }
+
+    @Test
+    public void testCatalogsContainCorrectItems() throws Exception {
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
+        catalogDao.create(new CatalogTable("#TEST1"));
+        catalogDao.create(new CatalogTable("#TEST2"));
+        RuntimeExceptionDao<ItemTable, Integer> itemDao = dbhelper.getItemTableDao();
+        ItemTable item = new ItemTable("#TEST1_1");
+        item.setCatalog(DataProvider.getCatalog(catalogDao, "#TEST1"));
+        item.setLocation(new LocationTable(""));
+        item.setRoom(new RoomTable("#ROOM1"));
+        itemDao.create(item);
+        item = new ItemTable("#TEST1_2");
+        item.setCatalog(DataProvider.getCatalog(catalogDao, "#TEST1"));
+        item.setLocation(new LocationTable("#LOCATION1"));
+        item.setRoom(new RoomTable("#ROOM2"));
+        itemDao.create(item);
+
+        Intent intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
+        intent.putExtra("CATALOG", "#TEST1");
+        mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
+        ItemListActivity activity = mControllerItemList.create().start().resume().visible().get();
+        ListView itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(2, itemList.getCount());
+        Map<String, String> datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST1_1");
+        datum.put("location", "#ROOM1");
+        assertEquals(datum, itemList.getItemAtPosition(0));
+        datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST1_2");
+        datum.put("location", "#LOCATION1\n#ROOM2");
+        assertEquals(datum, itemList.getItemAtPosition(1));
+        mControllerItemList = mControllerItemList.pause().stop().destroy();
+
+        intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
+        intent.putExtra("CATALOG", "#TEST2");
+        mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
+        activity = mControllerItemList.create().start().resume().visible().get();
+        itemList = (ListView) activity.findViewById(R.id.list);
         assertEquals(1, itemList.getCount());
         assertEquals(activity.getString(R.string.message_no_item), itemList.getItemAtPosition(0).toString());
         mControllerItemList = mControllerItemList.pause().stop().destroy();
