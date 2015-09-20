@@ -233,6 +233,99 @@ public class MainActivityTest {
         mControllerItemList = mControllerItemList.pause().stop().destroy();
     }
 
+    @Test
+    public void testItemEdit() throws Exception {
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
+        catalogDao.create(new CatalogTable("#TEST"));
+        RuntimeExceptionDao<ItemTable, Integer> itemDao = dbhelper.getItemTableDao();
+        ItemTable item = new ItemTable("#TEST1");
+        item.setCatalog(DataProvider.getCatalog(catalogDao, "#TEST"));
+        item.setLocation(new LocationTable(""));
+        item.setRoom(new RoomTable("#ROOM"));
+        itemDao.create(item);
+        int item1Id = item.getId();
+        item = new ItemTable("#TEST2");
+        item.setCatalog(DataProvider.getCatalog(catalogDao, "#TEST"));
+        item.setLocation(new LocationTable("#LOCATION"));
+        item.setRoom(new RoomTable("#ROOM2"));
+        itemDao.create(item);
+        int item2Id = item.getId();
+
+        Intent intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
+        ItemListActivity activity = mControllerItemList.create().start().resume().visible().get();
+        ListView itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(2, itemList.getCount());
+        Map<String, String> datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST1");
+        datum.put("location", "#ROOM");
+        assertEquals(datum, itemList.getItemAtPosition(0));
+        datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST2");
+        datum.put("location", "#LOCATION\n#ROOM2");
+        assertEquals(datum, itemList.getItemAtPosition(1));
+        mControllerItemList = mControllerItemList.pause().stop();
+
+        intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemEditActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        intent.putExtra("ITEM_ID", item1Id);
+        mControllerItemEdit = Robolectric.buildActivity(ItemEditActivity.class).withIntent(intent);
+        ItemEditActivity activityEdit = mControllerItemEdit.create().start().resume().visible().get();
+        EditText etItem = (EditText) activityEdit.findViewById(R.id.editTextItem);
+        assertEquals("#TEST1", etItem.getText().toString());
+        EditText etLocation = (EditText) activityEdit.findViewById(R.id.editTextLocation);
+        assertEquals("", etLocation.getText().toString());
+        EditText etRoom = (EditText) activityEdit.findViewById(R.id.editTextRoom);
+        assertEquals("#ROOM", etRoom.getText().toString());
+        etItem.setText("#TEST1_edit");
+        etLocation.setText("#LOCATION1");
+        Button saveButton = (Button) activityEdit.findViewById(R.id.buttonSaveItem);
+        saveButton.performClick();
+        mControllerItemEdit = mControllerItemEdit.pause().stop().destroy();
+
+        mControllerItemList = mControllerItemList.restart().resume();
+        itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(2, itemList.getCount());
+        datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST1_edit");
+        datum.put("location", "#LOCATION1\n#ROOM");
+        assertEquals(datum, itemList.getItemAtPosition(0));
+        datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST2");
+        datum.put("location", "#LOCATION\n#ROOM2");
+        assertEquals(datum, itemList.getItemAtPosition(1));
+        mControllerItemList = mControllerItemList.pause().stop();
+
+        // just check, don't edit
+        intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemEditActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        intent.putExtra("ITEM_ID", item2Id);
+        mControllerItemEdit = Robolectric.buildActivity(ItemEditActivity.class).withIntent(intent);
+        activityEdit = mControllerItemEdit.create().start().resume().visible().get();
+        etItem = (EditText) activityEdit.findViewById(R.id.editTextItem);
+        assertEquals("#TEST2", etItem.getText().toString());
+        etLocation = (EditText) activityEdit.findViewById(R.id.editTextLocation);
+        assertEquals("#LOCATION", etLocation.getText().toString());
+        etRoom = (EditText) activityEdit.findViewById(R.id.editTextRoom);
+        assertEquals("#ROOM2", etRoom.getText().toString());
+        activityEdit.finish();
+        mControllerItemEdit = mControllerItemEdit.pause().stop().destroy();
+
+        mControllerItemList = mControllerItemList.restart().resume();
+        itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(2, itemList.getCount());
+        datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST1_edit");
+        datum.put("location", "#LOCATION1\n#ROOM");
+        assertEquals(datum, itemList.getItemAtPosition(0));
+        datum = new HashMap<String, String>(2);
+        datum.put("item", "#TEST2");
+        datum.put("location", "#LOCATION\n#ROOM2");
+        assertEquals(datum, itemList.getItemAtPosition(1));
+        mControllerItemList = mControllerItemList.pause().stop().destroy();
+    }
+
     @After
     public void tearDown() throws Exception {
         dbhelper.close();
