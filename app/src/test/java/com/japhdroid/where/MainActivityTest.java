@@ -346,6 +346,35 @@ public class MainActivityTest {
         mControllerItemList = mControllerItemList.pause().stop().destroy();
     }
 
+    @Test
+    public void testItemClickToEdit() throws Exception {
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
+        catalogDao.create(new CatalogTable("#TEST"));
+        RuntimeExceptionDao<ItemTable, Integer> itemDao = dbhelper.getItemTableDao();
+        ItemTable item = new ItemTable("#TEST1");
+        item.setCatalog(DataProvider.getCatalog(catalogDao, "#TEST"));
+        item.setLocation(new LocationTable(""));
+        item.setRoom(new RoomTable("#ROOM"));
+        itemDao.create(item);
+
+        Intent intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
+        ItemListActivity activity = mControllerItemList.create().start().resume().visible().get();
+        ListView itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(1, itemList.getCount());
+        Map<String, String> mapItem = new HashMap<String, String>(2);
+        mapItem.put("item", item.getDescription());
+        mapItem.put("location", item.getRoom().getDescription());
+        assertEquals(mapItem, itemList.getItemAtPosition(0));
+
+        // Click on placeholder in ItemList
+        ListAdapter adapter = itemList.getAdapter();
+        View itemItemView = adapter.getView(0, null, itemList);
+        itemList.performItemClick(itemItemView, 0, adapter.getItemId(0));
+        mControllerItemList = mControllerItemList.pause().stop().destroy();
+    }
+
     @After
     public void tearDown() throws Exception {
         dbhelper.close();
