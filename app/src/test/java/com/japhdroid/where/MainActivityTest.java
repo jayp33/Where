@@ -234,6 +234,26 @@ public class MainActivityTest {
     }
 
     @Test
+    public void testItemClickToCreate() throws Exception {
+        RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
+        catalogDao.create(new CatalogTable("#TEST"));
+
+        Intent intent = new Intent(ShadowApplication.getInstance().getApplicationContext(), ItemListActivity.class);
+        intent.putExtra("CATALOG", "#TEST");
+        mControllerItemList = Robolectric.buildActivity(ItemListActivity.class).withIntent(intent);
+        ItemListActivity activity = mControllerItemList.create().start().resume().visible().get();
+        ListView itemList = (ListView) activity.findViewById(R.id.list);
+        assertEquals(1, itemList.getCount());
+        assertEquals(activity.getString(R.string.message_no_item), itemList.getItemAtPosition(0).toString());
+
+        // Click on placeholder in ItemList
+        ListAdapter adapter = itemList.getAdapter();
+        View itemItemView = adapter.getView(0, null, itemList);
+        itemList.performItemClick(itemItemView, 0, adapter.getItemId(0));
+        mControllerItemList = mControllerItemList.pause().stop().destroy();
+    }
+
+    @Test
     public void testItemEdit() throws Exception {
         RuntimeExceptionDao<CatalogTable, Integer> catalogDao = dbhelper.getCatalogTableDao();
         catalogDao.create(new CatalogTable("#TEST"));

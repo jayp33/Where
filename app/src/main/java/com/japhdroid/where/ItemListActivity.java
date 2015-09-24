@@ -71,11 +71,11 @@ public class ItemListActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String item = ((HashMap) parent.getItemAtPosition(position)).get("item").toString();
+                String item = parent.getItemAtPosition(position).toString();
                 if (item.equals(getString(R.string.message_no_item)))
                     CreateItem();
                 else
-                    EditItem(item);
+                    EditItem(((HashMap) parent.getItemAtPosition(position)).get("item").toString());
             }
         });
     }
